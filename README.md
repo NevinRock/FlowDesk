@@ -1,6 +1,8 @@
 
 
-- # <img src=".\title.png" alt="title" style="zoom:50%;" />
+
+
+- # ![header](.\github\header.gif)<img src=".\github\title.png" alt="title" style="zoom:50%;" />
 
   **FlowDesk** is a visual desktop automation tool that allows you to build and run workflows by connecting nodes on a canvas.
 
