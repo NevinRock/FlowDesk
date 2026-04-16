@@ -1,208 +1,182 @@
-# Autodesk (Frontend + Backend)
+- # FlowDesk
 
-A visual automation tool built with **React Flow (frontend)** and **FastAPI (backend)**.
+  **FlowDesk** is a visual desktop automation tool that allows you to build and run workflows by connecting nodes on a canvas.
 
-------
+  It combines a **React-based UI** with a **FastAPI backend** and executes automation directly on your local machine using PyAutoGUI.
 
-# Requirements
+  ------
 
-Make sure the following are installed:
+  ## ✨ Features
 
-## Frontend
+  - 🧩 **Visual Workflow Builder**
+     Create automation flows by dragging and connecting nodes
+  - 🖱 **Desktop Automation**
+     Automate mouse actions:
+    - Image-based clicking
+    - Coordinate clicking
+    - Waiting / conditional waiting
+    - Loop execution
+  - 📡 **Real-time Execution Feedback**
+     See which node is running and track loop progress live
+  - ⚡ **Single EXE Runtime**
+    - No need to install Python or Node.js
+    - Automatically opens in your browser
+    - Frontend and backend bundled together
 
-- Node.js (>= 16, recommended 18+)
-- npm (comes with Node.js)
+  ------
 
-## Backend
+  ## 🧱 Tech Stack
 
-- Python (>= 3.9)
-- pip
+  ### Frontend
 
-------
+  - React
+  - React Flow
+  - Vite
 
-#  Installation
+  ### Backend
 
-## 1. Clone the Repository
+  - FastAPI
+  - Uvicorn
+  - Pydantic
+  - PyAutoGUI
 
-```bash
-git clone <your-repo-url>
-cd <your-project-folder>
-```
+  ------
 
-------
+  ## 📂 Project Structure
 
-## 2. Setup Backend (FastAPI)
+  ```
+  FlowDesk/
+  ├── backend/
+  │   └── backend.py
+  ├── frontend/
+  │   ├── src/
+  │   └── dist/
+  ```
 
-Navigate to backend folder:
+  ------
 
-```bash
-cd backend
-```
+  ## ⚙️ Development Setup
 
-### Create virtual environment (recommended)
+  ### 1. Clone the repository
 
-```bash
-python -m venv venv
-```
+  ```
+  git clone https://github.com/NevinRock/FlowDesk.git
+  cd FlowDesk
+  ```
 
-### Activate virtual environment
+  ------
 
-**Mac / Linux**
+  ### 2. Backend setup
 
-```bash
-source venv/bin/activate
-```
+  ```
+  cd backend
+  python -m venv venv
+  venv\Scripts\activate
+  pip install -r requirements.txt
+  ```
 
-**Windows**
+  Run backend:
 
-```bash
-venv\Scripts\activate
-```
+  ```
+  python backend.py
+  ```
 
-### Install dependencies
+  ------
 
-```bash
-pip install -r requirements.txt
-```
+  ### 3. Frontend setup
 
-If you don’t have a `requirements.txt`, use:
+  ```
+  cd frontend
+  npm install
+  npm run dev
+  ```
 
-```txt
-fastapi
-uvicorn[standard]
-pydantic
-pyautogui
-python-multipart
-```
+  ------
 
-------
+  ## 📦 Build EXE (Windows)
 
-## 3. Run Backend
+  ### 1. Build frontend
 
-```bash
-uvicorn main:app --reload
-```
+  ```
+  cd frontend
+  npm run build
+  ```
 
-Backend will run at:
+  ------
 
-```
-http://127.0.0.1:8000
-```
+  ### 2. Package with PyInstaller
 
-------
+  ```
+  backend\venv\Scripts\python -m PyInstaller ^
+    --clean --noconfirm --onefile ^
+    --name FlowDesk ^
+    backend\backend.py ^
+    --add-data "frontend\dist;frontend_dist"
+  ```
 
-## 4. Setup Frontend
+  ------
 
-Open a new terminal and go to frontend folder:
+  ### 3. Run
 
-```bash
-cd frontend
-```
+  ```
+  dist\FlowDesk.exe
+  ```
 
-Install dependencies:
+  ------
 
-```bash
-npm install
-```
+  ## 🖥 How to Use
 
-------
+  1. Launch FlowDesk
+  2. Create a workflow using nodes
+  3. Click **Run**
+  4. Watch the automation execute on your desktop
 
-## 5. Run Frontend
+  ------
 
-```bash
-npm run dev
-```
+  ## ⚠️ Notes
 
-or (if using Create React App):
+  - Works only on local machines with a GUI
+  - May require system permissions (especially on macOS)
+  - Antivirus software may block automation behavior
 
-```bash
-npm start
-```
+  ------
 
-Open in browser:
+  ## 🐞 Troubleshooting
 
-```
-http://localhost:5173
-```
+  ### App does not open
 
-------
+  Check the terminal output and open the displayed URL manually.
 
-# Backend Connection
+  ------
 
-The frontend sends requests to:
+  ### Run button does nothing
 
-```
-http://127.0.0.1:8000/run
-```
+  - Make sure you're not using the Vite dev URL (`localhost:5173`)
+  - Open the app from the backend address instead
 
-Make sure the backend is running, otherwise the **Run** button will not work.
+  ------
 
-------
+  ### PyAutoGUI not working
 
-# Important Notes
+  - Ensure you're running locally (not on a server)
+  - Check system permissions
 
-## pyautogui
+  ------
 
-- Runs only on local machine (not suitable for servers)
-- Requires system permissions (especially on macOS)
+  ## 📌 .gitignore
 
-------
+  The following are ignored:
 
-## CORS (Backend)
+  - `venv/`
+  - `dist/`
+  - `build/`
+  - `*.exe`
+  - `*.spec`
 
-Ensure your backend includes:
+  You need to build the EXE locally.
 
-```python
-from fastapi.middleware.cors import CORSMiddleware
-```
+  ------
 
-------
+  ## 📄 License
 
-#  Troubleshooting
-
-## Frontend cannot connect to backend
-
-- Check backend is running
-- Check port is `8000`
-
-------
-
-## pyautogui not working
-
-- Ensure running locally
-- Check system permissions
-
-------
-
-## Missing dependencies
-
-```bash
-pip install -r requirements.txt
-npm install
-```
-
-------
-
-#  Quick Start
-
-```bash
-# backend
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
-
-# frontend (new terminal)
-cd frontend
-npm install
-npm run dev
-```
-
-------
-
-# You're Ready
-
-Now you can:
-
-- Build automation flows visually
-- Click **Run**
-- Execute automation on your machine 
+  MIT
