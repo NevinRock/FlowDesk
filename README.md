@@ -1,4 +1,6 @@
-- # FlowDesk
+
+
+- # <img src=".\web_output.png" alt="web_output" style="zoom:10%;" />FlowDesk
 
   **FlowDesk** is a visual desktop automation tool that allows you to build and run workflows by connecting nodes on a canvas.
 
