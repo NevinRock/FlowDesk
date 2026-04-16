@@ -2,185 +2,185 @@
 
 
 
-- # ![header](.\github\header.gif)<img src=".\github\title.png" alt="title" style="zoom:50%;" />
+# ![header](.\github\header.gif)<img src=".\github\title.png" alt="title" style="zoom:50%;" />
 
-  **FlowDesk** is a visual desktop automation tool that allows you to build and run workflows by connecting nodes on a canvas.
+**FlowDesk** is a visual desktop automation tool that allows you to build and run workflows by connecting nodes on a canvas.
 
-  It combines a **React-based UI** with a **FastAPI backend** and executes automation directly on your local machine using PyAutoGUI.
+It combines a **React-based UI** with a **FastAPI backend** and executes automation directly on your local machine using PyAutoGUI.
 
-  ------
+------
 
-  ## ✨ Features
+## ✨ Features
 
-  - 🧩 **Visual Workflow Builder**
-     Create automation flows by dragging and connecting nodes
-  - 🖱 **Desktop Automation**
-     Automate mouse actions:
-    - Image-based clicking
-    - Coordinate clicking
-    - Waiting / conditional waiting
-    - Loop execution
-  - 📡 **Real-time Execution Feedback**
-     See which node is running and track loop progress live
-  - ⚡ **Single EXE Runtime**
-    - No need to install Python or Node.js
-    - Automatically opens in your browser
-    - Frontend and backend bundled together
+- 🧩 **Visual Workflow Builder**
+   Create automation flows by dragging and connecting nodes
+- 🖱 **Desktop Automation**
+   Automate mouse actions:
+  - Image-based clicking
+  - Coordinate clicking
+  - Waiting / conditional waiting
+  - Loop execution
+- 📡 **Real-time Execution Feedback**
+   See which node is running and track loop progress live
+- ⚡ **Single EXE Runtime**
+  - No need to install Python or Node.js
+  - Automatically opens in your browser
+  - Frontend and backend bundled together
 
-  ------
+------
 
-  ## 🧱 Tech Stack
+## 🧱 Tech Stack
 
-  ### Frontend
+### Frontend
 
-  - React
-  - React Flow
-  - Vite
+- React
+- React Flow
+- Vite
 
-  ### Backend
+### Backend
 
-  - FastAPI
-  - Uvicorn
-  - Pydantic
-  - PyAutoGUI
+- FastAPI
+- Uvicorn
+- Pydantic
+- PyAutoGUI
 
-  ------
+------
 
-  ## 📂 Project Structure
+## 📂 Project Structure
 
-  ```
-  FlowDesk/
-  ├── backend/
-  │   └── backend.py
-  ├── frontend/
-  │   ├── src/
-  │   └── dist/
-  ```
+```
+FlowDesk/
+├── backend/
+│   └── backend.py
+├── frontend/
+│   ├── src/
+│   └── dist/
+```
 
-  ------
+------
 
-  ## ⚙️ Development Setup
+## ⚙️ Development Setup
 
-  ### 1. Clone the repository
+### 1. Clone the repository
 
-  ```
-  git clone https://github.com/NevinRock/FlowDesk.git
-  cd FlowDesk
-  ```
+```
+git clone https://github.com/NevinRock/FlowDesk.git
+cd FlowDesk
+```
 
-  ------
+------
 
-  ### 2. Backend setup
+### 2. Backend setup
 
-  ```
-  cd backend
-  python -m venv venv
-  venv\Scripts\activate
-  pip install -r requirements.txt
-  ```
+```
+cd backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-  Run backend:
+Run backend:
 
-  ```
-  python backend.py
-  ```
+```
+python backend.py
+```
 
-  ------
+------
 
-  ### 3. Frontend setup
+### 3. Frontend setup
 
-  ```
-  cd frontend
-  npm install
-  npm run dev
-  ```
+```
+cd frontend
+npm install
+npm run dev
+```
 
-  ------
+------
 
-  ## 📦 Build EXE (Windows)
+## 📦 Build EXE (Windows)
 
-  ### 1. Build frontend
+### 1. Build frontend
 
-  ```
-  cd frontend
-  npm run build
-  ```
+```
+cd frontend
+npm run build
+```
 
-  ------
+------
 
-  ### 2. Package with PyInstaller
+### 2. Package with PyInstaller
 
-  ```
-  backend\venv\Scripts\python -m PyInstaller ^
-    --clean --noconfirm --onefile ^
-    --name FlowDesk ^
-    backend\backend.py ^
-    --add-data "frontend\dist;frontend_dist"
-  ```
+```
+backend\venv\Scripts\python -m PyInstaller ^
+  --clean --noconfirm --onefile ^
+  --name FlowDesk ^
+  backend\backend.py ^
+  --add-data "frontend\dist;frontend_dist"
+```
 
-  ------
+------
 
-  ### 3. Run
+### 3. Run
 
-  ```
-  dist\FlowDesk.exe
-  ```
+```
+dist\FlowDesk.exe
+```
 
-  ------
+------
 
-  ## 🖥 How to Use
+## 🖥 How to Use
 
-  1. Launch FlowDesk
-  2. Create a workflow using nodes
-  3. Click **Run**
-  4. Watch the automation execute on your desktop
+1. Launch FlowDesk
+2. Create a workflow using nodes
+3. Click **Run**
+4. Watch the automation execute on your desktop
 
-  ------
+------
 
-  ## ⚠️ Notes
+## ⚠️ Notes
 
-  - Works only on local machines with a GUI
-  - May require system permissions (especially on macOS)
-  - Antivirus software may block automation behavior
+- Works only on local machines with a GUI
+- May require system permissions (especially on macOS)
+- Antivirus software may block automation behavior
 
-  ------
+------
 
-  ## 🐞 Troubleshooting
+## 🐞 Troubleshooting
 
-  ### App does not open
+### App does not open
 
-  Check the terminal output and open the displayed URL manually.
+Check the terminal output and open the displayed URL manually.
 
-  ------
+------
 
-  ### Run button does nothing
+### Run button does nothing
 
-  - Make sure you're not using the Vite dev URL (`localhost:5173`)
-  - Open the app from the backend address instead
+- Make sure you're not using the Vite dev URL (`localhost:5173`)
+- Open the app from the backend address instead
 
-  ------
+------
 
-  ### PyAutoGUI not working
+### PyAutoGUI not working
 
-  - Ensure you're running locally (not on a server)
-  - Check system permissions
+- Ensure you're running locally (not on a server)
+- Check system permissions
 
-  ------
+------
 
-  ## 📌 .gitignore
+## 📌 .gitignore
 
-  The following are ignored:
+The following are ignored:
 
-  - `venv/`
-  - `dist/`
-  - `build/`
-  - `*.exe`
-  - `*.spec`
+- `venv/`
+- `dist/`
+- `build/`
+- `*.exe`
+- `*.spec`
 
-  You need to build the EXE locally.
+You need to build the EXE locally.
 
-  ------
+------
 
-  ## 📄 License
+## 📄 License
 
-  MIT
+MIT
