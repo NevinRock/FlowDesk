@@ -216,6 +216,19 @@ const INITIAL_NODES = [
   },
 ];
 
+const WAIT_UNTIL_LS_KEY = "flowdesk.waitUntilMaxSeconds";
+
+function readStoredWaitUntilMaxSeconds() {
+  try {
+    const v = localStorage.getItem(WAIT_UNTIL_LS_KEY);
+    if (v == null) return 120;
+    const n = Number(v);
+    return Number.isFinite(n) && n >= 1 ? n : 120;
+  } catch {
+    return 120;
+  }
+}
+
 /* =============================================
    App Component
    ============================================= */
@@ -227,6 +240,18 @@ export default function App() {
   const [selectedEdgeId, setSelectedEdgeId] = useState(null);
   const [running, setRunning] = useState(false);
   const abortRef = useRef(null);
+  const [waitSettingsOpen, setWaitSettingsOpen] = useState(false);
+  const [waitUntilMaxSeconds, setWaitUntilMaxSeconds] = useState(
+    readStoredWaitUntilMaxSeconds
+  );
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(WAIT_UNTIL_LS_KEY, String(waitUntilMaxSeconds));
+    } catch {
+      /* ignore */
+    }
+  }, [waitUntilMaxSeconds]);
 
   const selectedNode = useMemo(
     () => nodes.find((n) => n.id === selectedNodeId) || null,
@@ -651,7 +676,13 @@ export default function App() {
       const res = await fetch("/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nodes, edges }),
+        body: JSON.stringify({
+          nodes,
+          edges,
+          run_settings: {
+            waitUntilTimeout: waitUntilMaxSeconds,
+          },
+        }),
         signal: controller.signal,
       });
 
@@ -733,6 +764,7 @@ export default function App() {
 
   // ──── Render ────
   return (
+    <>
     <div style={{ display: "flex", height: "100vh" }}>
       {/* ── Sidebar ── */}
       <div className="sidebar">
@@ -783,14 +815,39 @@ export default function App() {
           </button>
         </div>
 
-        <div className="shortcuts">
-          Del &mdash; Delete
-          <br />
-          Ctrl+Z &mdash; Undo
-          <br />
-          Ctrl+Y &mdash; Redo
-          <br />
-          Ctrl+S &mdash; Save
+        <div className="sidebar-footer">
+          <div className="shortcuts">
+            Del &mdash; Delete
+            <br />
+            Ctrl+Z &mdash; Undo
+            <br />
+            Ctrl+Y &mdash; Redo
+            <br />
+            Ctrl+S &mdash; Save
+          </div>
+          <button
+            type="button"
+            className="sidebar-settings-gear"
+            title="Global settings"
+            aria-label="Open settings"
+            onClick={() => setWaitSettingsOpen(true)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -954,5 +1011,55 @@ export default function App() {
         )}
       </div>
     </div>
+
+    {waitSettingsOpen && (
+      <div
+        className="modal-overlay"
+        role="presentation"
+        onClick={() => setWaitSettingsOpen(false)}
+      >
+        <div
+          className="modal-panel"
+          role="dialog"
+          aria-labelledby="settings-dialog-title"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h3 id="settings-dialog-title" className="modal-title">
+            Settings
+          </h3>
+          <p className="modal-hint">
+            Global limit: while running, each &ldquo;Wait Until&rdquo; step searches for
+            the image for at most this many seconds, then continues (timeout /
+            skip). Saved in this browser; applied on every Run.
+          </p>
+          <div className="field modal-field">
+            <label htmlFor="global-max-wait">
+              Max wait before skip (seconds)
+            </label>
+            <input
+              id="global-max-wait"
+              type="number"
+              min={1}
+              step={1}
+              value={waitUntilMaxSeconds}
+              onChange={(e) => {
+                const n = Number(e.target.value);
+                if (Number.isFinite(n) && n >= 1) setWaitUntilMaxSeconds(n);
+              }}
+            />
+          </div>
+          <div className="modal-actions">
+            <button
+              type="button"
+              className="modal-btn primary"
+              onClick={() => setWaitSettingsOpen(false)}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

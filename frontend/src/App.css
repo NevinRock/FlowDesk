@@ -72,11 +72,46 @@
   text-align: center;
 }
 
-.sidebar .shortcuts {
+.sidebar-footer {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-footer .shortcuts {
+  align-self: stretch;
   font-size: 11px;
   opacity: 0.35;
   line-height: 1.8;
+}
+
+.sidebar .sidebar-settings-gear {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid #334155;
+  border-radius: 50%;
+  background: #1e293b;
+  color: #94a3b8;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.sidebar .sidebar-settings-gear:hover {
+  background: #334155;
+  color: #e2e8f0;
+  border-color: #475569;
+}
+
+.sidebar .sidebar-settings-gear:active {
+  transform: scale(0.96);
 }
 
 /* ========== Properties Panel ========== */
@@ -346,4 +381,83 @@
 .react-flow__minimap {
   border-radius: 8px;
   overflow: hidden;
+}
+
+/* ========== Settings modal ========== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.modal-panel {
+  width: 100%;
+  max-width: 400px;
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 20px 22px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.modal-title {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.modal-hint {
+  margin: 0 0 16px;
+  font-size: 12px;
+  line-height: 1.55;
+  opacity: 0.75;
+}
+
+.modal-field {
+  margin-bottom: 16px;
+}
+
+.modal-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.modal-field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #e2e8f0;
+  font-size: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-btn.primary {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  background: #3b82f6;
+  color: #fff;
+}
+
+.modal-btn.primary:hover {
+  background: #2563eb;
 }

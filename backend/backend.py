@@ -51,6 +51,22 @@ frontend_index_path = frontend_dist_dir / "index.html"
 frontend_assets_dir = frontend_dist_dir / "assets"
 frontend_index_exists = frontend_index_path.exists()
 
+
+def _safe_dist_file(relative_path: str) -> Optional[Path]:
+    """Resolve a file under frontend_dist_dir, or None if unsafe / missing."""
+    if not relative_path or relative_path.startswith(("/", "\\")):
+        return None
+    parts = relative_path.replace("\\", "/").split("/")
+    if ".." in parts or "" in parts:
+        return None
+    base = frontend_dist_dir.resolve()
+    candidate = (frontend_dist_dir / Path(*parts)).resolve()
+    try:
+        candidate.relative_to(base)
+    except ValueError:
+        return None
+    return candidate if candidate.is_file() else None
+
 # Mount built assets (js/css/img) when available.
 if frontend_assets_dir.exists():
     app.mount("/assets", StaticFiles(directory=str(frontend_assets_dir), html=False), name="assets")
@@ -81,6 +97,7 @@ class Edge(BaseModel):
 class Flow(BaseModel):
     nodes: List[Node]
     edges: List[Edge]
+    run_settings: Optional[Dict[str, Any]] = None
 
 
 # =============================
@@ -160,7 +177,19 @@ def click_position(x=None, y=None):
 # Node Execution
 # =============================
 
-def run_node(node: Node):
+def _global_wait_until_timeout(run_settings: Optional[Dict[str, Any]]) -> float:
+    """Only global run_settings; per-node timeout is not used."""
+    rs = run_settings or {}
+    t_out = rs.get("waitUntilTimeout")
+    if t_out is None:
+        t_out = 30
+    try:
+        return float(t_out)
+    except (TypeError, ValueError):
+        return 30.0
+
+
+def run_node(node: Node, run_settings: Optional[Dict[str, Any]] = None):
     data = node.data
     t = data.get("type")
     print(f">> EXEC {node.id} ({t})")
@@ -170,7 +199,11 @@ def run_node(node: Node):
     elif t == "wait":
         wait(data.get("time", 1))
     elif t == "waitUntil":
-        wait_until(data.get("image"), data.get("interval", 1))
+        wait_until(
+            data.get("image"),
+            data.get("interval", 1),
+            _global_wait_until_timeout(run_settings),
+        )
     elif t == "check":
         click_position(data.get("x"), data.get("y"))
     elif t == "start":
@@ -220,7 +253,15 @@ def build_maps(nodes, edges):
 MAX_STEPS = 10000
 
 
-def execute_stream(start_id, stop_before_id, node_map, flow, loop_at_node, active_loops=None):
+def execute_stream(
+    start_id,
+    stop_before_id,
+    node_map,
+    flow,
+    loop_at_node,
+    active_loops=None,
+    run_settings=None,
+):
     """
     Generator: executes each node and yields its id immediately after.
     Callers use `yield from` for recursive loop calls.
@@ -259,13 +300,17 @@ def execute_stream(start_id, stop_before_id, node_map, flow, loop_at_node, activ
                 yield {"type": "loop", "loop_id": loop_id, "current": i + 1, "total": count}
                 print(f"  iteration {i + 1}/{count}")
                 yield from execute_stream(
-                    current, end_id,
-                    node_map, flow, loop_at_node,
+                    current,
+                    end_id,
+                    node_map,
+                    flow,
+                    loop_at_node,
                     inner_active,
+                    run_settings,
                 )
                 end_node = node_map.get(end_id)
                 if end_node:
-                    run_node(end_node)
+                    run_node(end_node, run_settings)
                     yield {"type": "node", "node": end_id}
 
             print("--- Loop done ---\n")
@@ -273,7 +318,7 @@ def execute_stream(start_id, stop_before_id, node_map, flow, loop_at_node, activ
             current = next_ids[0] if next_ids else None
             continue
 
-        run_node(node)
+        run_node(node, run_settings)
         yield {"type": "node", "node": current}
 
         next_ids = flow.get(current, [])
@@ -299,10 +344,17 @@ async def run_flow(flow_data: Flow):
     if not first_nodes:
         return {"error": "Start node has no outgoing connection"}
 
+    rs = flow_data.run_settings
+
     def sse():
         for msg in execute_stream(
-            first_nodes[0], None,
-            node_map, flow_graph, loop_at_node,
+            first_nodes[0],
+            None,
+            node_map,
+            flow_graph,
+            loop_at_node,
+            None,
+            rs,
         ):
             yield f"data: {json.dumps(msg)}\n\n"
         yield f"data: {json.dumps({'done': True})}\n\n"
@@ -339,10 +391,13 @@ async def index_html():
 @app.get("/{full_path:path}")
 async def spa_fallback(full_path: str):
     # Let exact API routes (e.g. /run) handle themselves.
-    # Everything else is treated as SPA routes and should render index.html.
+    # Serve real files from dist root (favicon, web_icon.svg, etc.); else SPA.
     if full_path.startswith("assets/"):
         raise HTTPException(status_code=404, detail="Not found")
     if frontend_index_exists:
+        dist_file = _safe_dist_file(full_path)
+        if dist_file is not None:
+            return FileResponse(str(dist_file))
         return FileResponse(str(frontend_index_path))
     raise HTTPException(status_code=404, detail="Not found")
 
