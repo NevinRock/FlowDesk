@@ -1,0 +1,349 @@
+/* ========== Sidebar ========== */
+
+.sidebar {
+  width: 200px;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  user-select: none;
+  border-right: 1px solid #1e293b;
+}
+
+.sidebar h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.5;
+}
+
+.sidebar button {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  background: #1e293b;
+  color: #e2e8f0;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.sidebar button:hover {
+  background: #334155;
+}
+
+.sidebar button:active {
+  background: #475569;
+}
+
+.sidebar .run-btn {
+  background: #16a34a;
+  text-align: center;
+  font-weight: 600;
+}
+
+.sidebar .run-btn:hover {
+  background: #15803d;
+}
+
+.sidebar .stop-btn {
+  background: #dc2626;
+  text-align: center;
+  font-weight: 600;
+}
+
+.sidebar .stop-btn:hover {
+  background: #b91c1c;
+}
+
+.sidebar .undo-redo {
+  display: flex;
+  gap: 6px;
+}
+
+.sidebar .undo-redo button {
+  flex: 1;
+  text-align: center;
+}
+
+.sidebar .shortcuts {
+  margin-top: auto;
+  font-size: 11px;
+  opacity: 0.35;
+  line-height: 1.8;
+}
+
+/* ========== Properties Panel ========== */
+
+.properties {
+  width: 260px;
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 16px;
+  overflow-y: auto;
+  border-left: 1px solid #334155;
+}
+
+.properties h3 {
+  margin: 0 0 14px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.5;
+}
+
+.properties .node-type {
+  font-size: 12px;
+  opacity: 0.5;
+  margin-bottom: 12px;
+}
+
+.properties .field {
+  margin-bottom: 14px;
+}
+
+.properties label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  opacity: 0.6;
+  font-weight: 500;
+}
+
+.properties input[type="number"],
+.properties input[type="text"] {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.properties input[type="number"]:focus,
+.properties input[type="text"]:focus {
+  border-color: #3b82f6;
+}
+
+.properties input[type="file"] {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.properties .preview-img {
+  max-width: 100%;
+  margin-top: 8px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+}
+
+/* ── Image Drop Zone ── */
+
+.image-drop-zone.empty {
+  border: 2px dashed #475569;
+  border-radius: 8px;
+  padding: 20px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  background: #0f172a;
+}
+
+.image-drop-zone.empty:hover,
+.image-drop-zone.empty.dragging {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.drop-zone-icon {
+  font-size: 28px;
+  line-height: 1;
+  opacity: 0.4;
+  margin-bottom: 6px;
+  transition: opacity 0.2s;
+}
+
+.image-drop-zone.empty:hover .drop-zone-icon,
+.image-drop-zone.empty.dragging .drop-zone-icon {
+  opacity: 0.8;
+  color: #3b82f6;
+}
+
+.drop-zone-text {
+  font-size: 11px;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.image-drop-zone.empty:hover .drop-zone-text {
+  opacity: 0.7;
+}
+
+.image-drop-zone.has-image {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #334155;
+}
+
+.drop-zone-preview {
+  display: block;
+  width: 100%;
+  border-radius: 7px;
+}
+
+.drop-zone-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.image-drop-zone.has-image:hover .drop-zone-overlay {
+  opacity: 1;
+}
+
+.drop-zone-btn {
+  padding: 5px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  font-size: 12px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.15s;
+}
+
+.drop-zone-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.drop-zone-btn.danger {
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fca5a5;
+}
+
+.drop-zone-btn.danger:hover {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+.properties .delete-btn {
+  width: 100%;
+  padding: 8px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  transition: background 0.15s;
+}
+
+.properties .delete-btn:hover {
+  background: #b91c1c;
+}
+
+/* ========== Custom Nodes ========== */
+
+.custom-node {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 2px solid #475569;
+  background: #1e293b;
+  color: #e2e8f0;
+  font-size: 13px;
+  min-width: 130px;
+  text-align: center;
+  position: relative;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.custom-node.selected {
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.5);
+}
+
+.custom-node .node-label {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.custom-node .node-thumb {
+  max-width: 80px;
+  max-height: 60px;
+  margin-top: 6px;
+  border-radius: 4px;
+}
+
+/* Start node */
+.start-node {
+  background: #14532d;
+  border-color: #22c55e;
+}
+
+/* Loop node */
+.loop-node {
+  background: #431407;
+  border-color: #f97316;
+  min-width: 110px;
+}
+
+/* Handle base styles */
+.react-flow__handle {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+/* Loop-start handle (green) */
+.loop-handle-start {
+  background: #22c55e !important;
+  width: 10px !important;
+  height: 10px !important;
+  border: 2px solid #fff4 !important;
+}
+
+/* Loop-end handle (red) */
+.loop-handle-end {
+  background: #ef4444 !important;
+  width: 10px !important;
+  height: 10px !important;
+  border: 2px solid #fff4 !important;
+}
+
+/* Edge label styling */
+.react-flow__edge-textbg {
+  fill: #1e293b;
+}
+
+.react-flow__edge-text {
+  font-size: 11px;
+  fill: #f97316;
+}
+
+/* Canvas background */
+.react-flow__background {
+  background: #0f172a;
+}
+
+.react-flow__minimap {
+  border-radius: 8px;
+  overflow: hidden;
+}
