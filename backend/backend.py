@@ -1,6 +1,10 @@
-from fastapi import FastAPI
+import sys
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 import pyautogui
@@ -22,6 +26,34 @@ app.add_middleware(
 
 pyautogui.FAILSAFE = True
 pyautogui.PAUSE = 0.3
+
+#
+# =============================
+# Frontend (Vite) static files
+# =============================
+#
+# Goal: make PyInstaller single-EXE also serve the React UI.
+#
+# When frozen by PyInstaller:
+#   frontend/dist  will be bundled into:  _MEIPASS/frontend_dist
+# When running from source:
+#   we read: ../frontend/dist
+#
+def get_frontend_dist_dir() -> Path:
+    if getattr(sys, "frozen", False):
+        base_dir = Path(getattr(sys, "_MEIPASS", "."))
+        return base_dir / "frontend_dist"
+    return Path(__file__).resolve().parent.parent / "frontend" / "dist"
+
+
+frontend_dist_dir = get_frontend_dist_dir()
+frontend_index_path = frontend_dist_dir / "index.html"
+frontend_assets_dir = frontend_dist_dir / "assets"
+frontend_index_exists = frontend_index_path.exists()
+
+# Mount built assets (js/css/img) when available.
+if frontend_assets_dir.exists():
+    app.mount("/assets", StaticFiles(directory=str(frontend_assets_dir), html=False), name="assets")
 
 
 # =============================
@@ -297,11 +329,55 @@ async def mouse_live():
     return {"x": x, "y": y}
 
 
+@app.get("/index.html")
+async def index_html():
+    if not frontend_index_exists:
+        raise HTTPException(status_code=404, detail="frontend index.html not found")
+    return FileResponse(str(frontend_index_path))
+
+
+@app.get("/{full_path:path}")
+async def spa_fallback(full_path: str):
+    # Let exact API routes (e.g. /run) handle themselves.
+    # Everything else is treated as SPA routes and should render index.html.
+    if full_path.startswith("assets/"):
+        raise HTTPException(status_code=404, detail="Not found")
+    if frontend_index_exists:
+        return FileResponse(str(frontend_index_path))
+    raise HTTPException(status_code=404, detail="Not found")
+
+
 @app.get("/")
 async def home():
+    if frontend_index_exists:
+        return FileResponse(str(frontend_index_path))
     return {"message": "desk_auto backend running"}
+
+import socket
+
+def find_free_port():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("", 0))
+        return s.getsockname()[1]
 
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    import threading
+    import webbrowser
+
+    port = find_free_port()
+    url = f"http://127.0.0.1:{port}/"
+    print(f"Running on {url}")
+
+    def open_browser():
+        time.sleep(1)
+        try:
+            webbrowser.open(url)
+        except Exception:
+            # If browser open fails (e.g. locked-down environment), still run the server.
+            pass
+
+    threading.Thread(target=open_browser, daemon=True).start()
+
+    uvicorn.run(app, host="127.0.0.1", port=port)

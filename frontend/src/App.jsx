@@ -647,7 +647,8 @@ export default function App() {
     abortRef.current = controller;
     setRunning(true);
     try {
-      const res = await fetch("http://127.0.0.1:8000/run", {
+      // Use same-origin requests so the backend port can be selected dynamically.
+      const res = await fetch("/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nodes, edges }),

@@ -66,3 +66,28 @@ build/
 *.png
 *.jpg
 *.jpeg
+
+# =========================
+# PyInstaller
+# =========================
+
+# PyInstaller build temp
+build/
+dist/
+
+# Spec file (can be regenerated)
+*.spec
+
+# PyInstaller cache
+__pyinstaller__/
+
+# Hook files / analysis cache (rare but safe to ignore)
+*.manifest
+*.toc
+*.pyz
+*.pkg
+
+# Executables (optional: ignore if you don't want to commit EXE)
+*.exe
+*.app
+*.dmg
