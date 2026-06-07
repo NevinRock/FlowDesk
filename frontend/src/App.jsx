@@ -103,6 +103,8 @@ const NODE_COLORS = {
   wait: { bg: "#3b2e1e", border: "#eab308" },
   check: { bg: "#1e3b3b", border: "#14b8a6" },
   waitUntil: { bg: "#2e1e3b", border: "#a855f7" },
+  press: { bg: "#1e2e1e", border: "#22c55e" },
+  pressUntil: { bg: "#3b1e1e", border: "#ef4444" },
 };
 
 function RegularNode({ data, selected }) {
@@ -134,6 +136,7 @@ function RegularNode({ data, selected }) {
       <div className="node-label">
         {data.label}
         {data.type === "wait" && ` ${data.time}s`}
+        {(data.type === "press" || data.type === "pressUntil") && data.key && ` [${data.key}]`}
       </div>
       {data.image && (
         <img src={data.image} alt="" className="node-thumb" />
@@ -419,6 +422,14 @@ export default function App() {
           interval: 1,
         },
         loop: { label: "Loop", type: "loop", count: 3 },
+        press: { label: "Press Key", type: "press", key: "" },
+        pressUntil: {
+          label: "Press Until",
+          type: "pressUntil",
+          key: "",
+          image: null,
+          interval: 1,
+        },
       };
 
       const data = dataMap[type];
@@ -686,6 +697,12 @@ export default function App() {
         signal: controller.signal,
       });
 
+      // Backend may return a JSON error instead of SSE stream
+      if (!res.ok || !res.headers.get("content-type")?.startsWith("text/event-stream")) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
+
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       const visited = new Set();
@@ -744,8 +761,10 @@ export default function App() {
           );
         }
       }
-    } catch {
-      /* aborted or backend offline */
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        alert(err.message || "Failed to run flow. Is the backend running?");
+      }
     } finally {
       setNodes((nds) =>
         nds.map((n) => {
@@ -773,6 +792,8 @@ export default function App() {
         <button onClick={() => addNode("wait")}>Wait</button>
         <button onClick={() => addNode("waitUntil")}>Wait Until</button>
         <button onClick={() => addNode("check")}>Click Position</button>
+        <button onClick={() => addNode("press")}>Press Key</button>
+        <button onClick={() => addNode("pressUntil")}>Press Until</button>
         <button onClick={() => addNode("loop")}>Loop</button>
 
         <hr style={{ border: "none", borderTop: "1px solid #334155", margin: "6px 0" }} />
@@ -1002,6 +1023,66 @@ export default function App() {
                   &rarr; loop end node
                 </p>
               </div>
+            )}
+
+            {/* Press Key */}
+            {selectedNode.data.type === "press" && (
+              <div className="field">
+                <label>Key (e.g. enter, space, a, ctrl)</label>
+                <input
+                  type="text"
+                  value={selectedNode.data.key || ""}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                  onChange={(e) => updateNode("key", e.target.value)}
+                  placeholder="enter"
+                />
+                <p style={{ fontSize: 11, opacity: 0.4, marginTop: 4 }}>
+                  Presses and releases the key once.
+                </p>
+              </div>
+            )}
+
+            {/* Press Until */}
+            {selectedNode.data.type === "pressUntil" && (
+              <>
+                <div className="field">
+                  <label>Key (e.g. enter, space, w, shift)</label>
+                  <input
+                    type="text"
+                    value={selectedNode.data.key || ""}
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
+                    onChange={(e) => updateNode("key", e.target.value)}
+                    placeholder="w"
+                  />
+                </div>
+                <div className="field">
+                  <label>Target Image</label>
+                  <ImageDropZone
+                    image={selectedNode.data.image}
+                    onUpload={handleImageUpload}
+                    onClear={() => { takeSnapshot(); updateNode("image", null); }}
+                  />
+                </div>
+                <div className="field">
+                  <label>Check Interval (seconds)</label>
+                  <input
+                    type="number"
+                    min={0.1}
+                    step={0.1}
+                    value={selectedNode.data.interval}
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
+                    onChange={(e) =>
+                      updateNode("interval", Number(e.target.value))
+                    }
+                  />
+                </div>
+                <p style={{ fontSize: 11, opacity: 0.4, marginTop: 8 }}>
+                  Holds the key down until the target image appears on screen.
+                </p>
+              </>
             )}
           </div>
         ) : (

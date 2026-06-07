@@ -206,6 +206,40 @@ def run_node(node: Node, run_settings: Optional[Dict[str, Any]] = None):
         )
     elif t == "check":
         click_position(data.get("x"), data.get("y"))
+    elif t == "press":
+        key = data.get("key", "")
+        if key:
+            print(f"  press key: {key}")
+            pyautogui.press(key)
+        else:
+            print("  [!] press: no key specified")
+    elif t == "pressUntil":
+        key = data.get("key", "")
+        image = data.get("image")
+        interval = data.get("interval", 1)
+        timeout = _global_wait_until_timeout(run_settings)
+        if not key:
+            print("  [!] pressUntil: no key specified")
+        elif not image:
+            print("  [!] pressUntil: no image specified")
+        else:
+            print(f"  holding key [{key}], waiting for image (timeout={timeout}s)...")
+            pyautogui.keyDown(key)
+            try:
+                start = time.time()
+                found = False
+                while True:
+                    if find_image(image):
+                        found = True
+                        break
+                    if time.time() - start > timeout:
+                        print("  [x] pressUntil: timeout")
+                        break
+                    time.sleep(interval)
+                if found:
+                    print("  [ok] pressUntil: image found, releasing key")
+            finally:
+                pyautogui.keyUp(key)
     elif t == "start":
         pass
     else:
@@ -388,6 +422,24 @@ async def index_html():
     return FileResponse(str(frontend_index_path))
 
 
+@app.get("/favicon.ico")
+async def favicon():
+    if frontend_index_exists:
+        dist_file = _safe_dist_file("favicon.ico")
+        if dist_file is not None:
+            return FileResponse(str(dist_file))
+    # Return empty response to avoid 404 noise in browser
+    from fastapi.responses import Response
+    return Response(content=b"", media_type="image/x-icon")
+
+
+@app.get("/")
+async def home():
+    if frontend_index_exists:
+        return FileResponse(str(frontend_index_path))
+    return {"message": "desk_auto backend running"}
+
+
 @app.get("/{full_path:path}")
 async def spa_fallback(full_path: str):
     # Let exact API routes (e.g. /run) handle themselves.
@@ -401,16 +453,17 @@ async def spa_fallback(full_path: str):
         return FileResponse(str(frontend_index_path))
     raise HTTPException(status_code=404, detail="Not found")
 
-
-@app.get("/")
-async def home():
-    if frontend_index_exists:
-        return FileResponse(str(frontend_index_path))
-    return {"message": "desk_auto backend running"}
-
 import socket
 
-def find_free_port():
+def find_free_port(preferred=59332):
+    # Try preferred port first
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.bind(("127.0.0.1", preferred))
+            return preferred
+        except OSError:
+            pass
+    # Fall back to any free port
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("", 0))
         return s.getsockname()[1]
@@ -425,12 +478,15 @@ if __name__ == "__main__":
     url = f"http://127.0.0.1:{port}/"
     print(f"Running on {url}")
 
+    # Write port to file so Vite proxy can pick it up
+    port_file = Path(__file__).resolve().parent / ".backend_port"
+    port_file.write_text(str(port))
+
     def open_browser():
         time.sleep(1)
         try:
             webbrowser.open(url)
         except Exception:
-            # If browser open fails (e.g. locked-down environment), still run the server.
             pass
 
     threading.Thread(target=open_browser, daemon=True).start()
